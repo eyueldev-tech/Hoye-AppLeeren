@@ -1,0 +1,22 @@
+name: Validate learning question bank
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check question bank syntax
+        run: node --check question-bank.js
+      - name: Check app inline JavaScript syntax
+        run: |
+          node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const js=html.split('<script>').pop().split('</script>')[0];new (require('vm').Script)(js);console.log('App JavaScript syntax OK')"
+      - name: Validate question counts and answers
+        run: node validate-question-bank.cjs
